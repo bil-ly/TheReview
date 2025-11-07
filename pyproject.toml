@@ -8,4 +8,13 @@ dependencies = [
     "fastapi",
     "uvicorn[standard]",
     "httpx",
+    "fastapi-auth-lib",
 ]
+
+[tool.uv.workspace]
+members = [
+    "lib/auth",
+]
+
+[tool.uv.sources]
+fastapi-auth-lib = { workspace = true, editable = true }
