@@ -1,11 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException , status
-from models.user import UserCreate , UserLogin , PasswordResetConfirmModel, PasswordResetRequestModel
-from utils.dependencies import get_auth_service
-from models.student import Student
+from app.models.user import UserCreate , UserLogin , PasswordResetConfirmModel, PasswordResetRequestModel , UserRole
 from typing import Dict, Any
-from utils.dependencies import get_auth_service, get_current_user_dependency
+from app.utils.dependencies import get_auth_service, get_current_user_dependency
 from fastapi.responses import JSONResponse
-from dataclasses import asdict
 
 
 router = APIRouter(prefix="/auth", tags=["authentication"])
@@ -22,23 +19,12 @@ async def register_user(
             password=user_data.password,
             username=user_data.username,
             full_name=user_data.full_name,
-            role="student" 
+            role=UserRole.REVIEWER
         )
-
-        user_id = result["_id"]
-
-        student_data = Student(
-            user_id=user_id,
-            subjects=[] 
-        )
-
-        student_dict = asdict(student_data)
-
-        await auth_service.database.db.students.insert_one(student_dict)
 
         return {
             "message": "User registered successfully",
-            "user_id": user_id
+            "user_id": result["user_id"]
         }
 
     except HTTPException:
@@ -62,7 +48,6 @@ async def login_user(
             password=login_data.password,
             totp_code=login_data.totp_code
         )
-        print(login_data.username)
         return result 
     except HTTPException:
         raise
