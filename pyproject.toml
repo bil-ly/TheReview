@@ -9,6 +9,7 @@ dependencies = [
     "uvicorn[standard]",
     "httpx",
     "fastapi-auth-lib",
+    "pydantic-settings>=2.11.0",
 ]
 
 [tool.uv.workspace]

@@ -1,4 +1,4 @@
-from pc_auth_lib.interfaces import DatabaseInterface
+from auth_lib.interfaces import DatabaseInterface
 from motor.motor_asyncio import AsyncIOMotorDatabase
 from typing import Optional, Dict, Any
 import hashlib

@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo.collection import Collection
 
-from ..config import settings
+from app.core.config import settings
 
 logger = logging.getLogger("db_utils")
 logger.setLevel(logging.DEBUG)
@@ -50,7 +50,7 @@ async def get_db() -> AsyncIOMotorClient:
     if db_context.client is None:
         raise Exception("Database client not initialized. Call connect_to_mongo() on startup.")
    
-    return db_context.client[settings.DATABASE_NAME]
+    return db_context.client[settings.MONGO_DATABASE_NAME]
 
 
 # --- 5. All Helper Functions Converted to Async ---

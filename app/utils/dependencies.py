@@ -1,6 +1,6 @@
 from fastapi import Request, HTTPException, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from pc_auth_lib.auth_service import AuthService
+from auth_lib.auth_service import AuthService
 
 # HTTP Bearer token scheme
 security = HTTPBearer()
