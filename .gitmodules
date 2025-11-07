@@ -1,0 +1,6 @@
+[submodule "python_auth_lib"]
+	path = python_auth_lib
+	url = git@github.com:bil-ly/python_auth_lib.git
+[submodule "lib/auth"]
+	path = lib/auth
+	url = git@github.com:bil-ly/python_auth_lib.git
