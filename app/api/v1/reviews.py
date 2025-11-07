@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-router = APIRouter()
+router = APIRouter(prefix="/api/v1/reviews", tags=["reviews"])
 
 @router.get("/")
 def read_reviews():

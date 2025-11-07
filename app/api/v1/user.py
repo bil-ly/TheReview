@@ -2,50 +2,13 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel, EmailStr
 from typing import Optional, List, Dict, Any
 from datetime import datetime, timezone
-from enum import Enum
+
+from app.models.user import CreateUserModel, UpdateUserModel, CustomPermissionModel, UserRole, USER_CUSTOM_PERMISSIONS
+from app.utils.user_managemet import get_user_role ,check_permission ,require_permission
 from fastapi import Query
-from utils.dependencies import get_auth_service, get_current_user_dependency
-from models.user import UserRole, ROLE_PERMISSIONS, USER_CUSTOM_PERMISSIONS, CreateUserModel , UpdateUserModel , CustomPermissionModel
+from app.utils.dependencies import get_auth_service, get_current_user_dependency
 
 router = APIRouter(prefix="/users", tags=["user-management"])
-
-def get_user_role(user: Dict[str, Any]) -> UserRole:
-    return UserRole(user.get("role", UserRole.STUDENT))
-
-def get_user_permissions(user: Dict[str, Any]) -> Dict[str, Any]:
-    """Merge role permissions with custom overrides"""
-    role = get_user_role(user)
-    base = ROLE_PERMISSIONS.get(role, {})
-    custom = USER_CUSTOM_PERMISSIONS.get(user["_id"], {})
-    return {**base, **custom}
-
-def check_permission(current_user: Dict[str, Any], target_role: UserRole, action: str) -> bool:
-    perms = get_user_permissions(current_user)
-    
-    # Prevent teachers from managing admins
-    if get_user_role(current_user) == UserRole.TEACHER and target_role == UserRole.ADMIN:
-        return False
-
-    if action == "create":
-        return target_role in perms.get("can_create", []) or (perms.get("can_manage_all", False) and target_role != UserRole.ADMIN)
-    elif action == "view":
-        return target_role in perms.get("can_view", []) or (perms.get("can_manage_all", False) and target_role != UserRole.ADMIN)
-    elif action == "update":
-        return target_role in perms.get("can_update", []) or (perms.get("can_manage_all", False) and target_role != UserRole.ADMIN)
-    elif action == "delete":
-        return target_role in perms.get("can_delete", []) or (perms.get("can_manage_all", False) and target_role != UserRole.ADMIN)
-    
-    return False
-
-def require_permission(action: str, target_role: UserRole = None):
-    def checker(current_user = Depends(get_current_user_dependency)):
-        if target_role and not check_permission(current_user, target_role, action):
-            raise HTTPException(
-                status_code=403,
-                detail=f"{get_user_role(current_user).value} cannot {action} {target_role.value} accounts"
-            )
-        return current_user
-    return checker
 
 
 @router.post("/create")
@@ -101,20 +64,6 @@ async def delete_user(user_id: str,
     return {"message": "User deleted", "user_id": user_id}
 
 
-@router.patch("/{user_id}/permissions")
-async def assign_custom_permissions(user_id: str,
-                                    permissions_data: CustomPermissionModel,
-                                    auth_service = Depends(get_auth_service),
-                                    current_user = Depends(require_permission("update", UserRole.TEACHER))):
-    """Admin assigns custom permissions to a teacher"""
-    user = await auth_service.database.get_user_by_id(user_id)
-    if not user or get_user_role(user) != UserRole.TEACHER:
-        raise HTTPException(status_code=400, detail="Custom permissions can only be assigned to teachers")
-    
-    new_perms = {k: v for k, v in permissions_data.dict(exclude_unset=True).items()}
-    USER_CUSTOM_PERMISSIONS[user_id] = new_perms
-    return {"message": "Custom permissions updated", "user_id": user_id, "permissions": new_perms}
-
 @router.get("/list")
 async def list_users(
     role: Optional[UserRole] = Query(None, description="Filter users by role"),
@@ -130,9 +79,9 @@ async def list_users(
     """
     try:
         if get_user_role(current_user) == UserRole.ADMIN:
-            allowed_roles = [UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT]
-        elif get_user_role(current_user) == UserRole.TEACHER:
-            allowed_roles = [UserRole.STUDENT]
+            allowed_roles = [UserRole.ADMIN, UserRole.REVIEWER]
+        elif get_user_role(current_user) == UserRole.REVIEWER:
+            allowed_roles = [UserRole.REVIEWER]
         else:
             raise HTTPException(status_code=403, detail="Insufficient permissions to list users")
 

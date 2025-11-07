@@ -5,15 +5,14 @@ from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Dict, List, Optional
 from pydantic import BaseModel, EmailStr
-from utils.logger import get_logger
+from app.utils.logger import get_logger
 
 logger = get_logger("UserModel", log_to_std_out=True)
 
 ## USER ROLE
 class UserRole(str, Enum):
     ADMIN = "admin"
-    TEACHER = "teacher"
-    STUDENT = "student"
+    REVIEWER = "reviewer"
 
 @dataclass
 class User:
@@ -22,7 +21,7 @@ class User:
     username: str = ""
     email: str = ""
     hashed_password: str = ""
-    role: UserRole= UserRole.STUDENT
+    role: UserRole= UserRole.REVIEWER
     is_active: bool = True
     two_factor_enabled: bool = False
 
@@ -81,24 +80,17 @@ USER_CUSTOM_PERMISSIONS: Dict[str, Dict[str, Any]] = {}
 # Default permission matrix , for when i want to add custgom permmisions later on
 ROLE_PERMISSIONS = {
     UserRole.ADMIN: {
-        "can_create": [UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT],
-        "can_view": [UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT],
-        "can_update": [UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT],
-        "can_delete": [UserRole.ADMIN, UserRole.TEACHER, UserRole.STUDENT],
+        "can_create": [UserRole.ADMIN, UserRole.REVIEWER],
+        "can_view": [UserRole.ADMIN, UserRole.REVIEWER],
+        "can_update": [UserRole.ADMIN, UserRole.REVIEWER],
+        "can_delete": [UserRole.ADMIN, UserRole.REVIEWER],
         "can_manage_all": True
     },
-    UserRole.TEACHER: {
-        "can_create": [UserRole.STUDENT],
-        "can_view": [UserRole.TEACHER, UserRole.STUDENT],
-        "can_update": [UserRole.STUDENT],
-        "can_delete": [UserRole.STUDENT],
-        "can_manage_all": False 
-    },
-    UserRole.STUDENT: {
+    UserRole.REVIEWER: {
         "can_create": [],
-        "can_view": [UserRole.STUDENT],
+        "can_view": [],
         "can_update": [],
         "can_delete": [],
-        "can_manage_all": False
+        "can_manage_all": False 
     }
 }

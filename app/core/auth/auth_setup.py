@@ -1,14 +1,12 @@
-from libs.pc_auth_lib.src.pc_auth_lib.auth_service import AuthService
-from libs.pc_auth_lib.src.pc_auth_lib.utils.redis_utils import TwoFactorService
-from libs.pc_auth_lib.src.pc_auth_lib.utils.email_service import DevEmailService, GmailSMTPService
+from auth_lib.auth_service import AuthService
+from auth_lib.utils.redis_utils import TwoFactorService
+from auth_lib.utils.email_service import DevEmailService, GmailSMTPService
 from motor.motor_asyncio import AsyncIOMotorDatabase
-from utils.mongo.user_repository import MongoUserRepository
-from utils.config import settings
+from app.utils.mongo.user_repository import MongoUserRepository
+from app.core.config import settings
 
 
 def create_auth_service(database: AsyncIOMotorDatabase) -> AuthService:
-    """Create auth service with MongoDB repository"""
-
     user_repository = MongoUserRepository(database)
     two_factor_service = TwoFactorService(settings.REDIS_HOST)
     email_service = DevEmailService()
