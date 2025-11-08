@@ -24,7 +24,7 @@ async def register_user(
 
         return {
             "message": "User registered successfully",
-            "user_id": result["user_id"]
+            "user_id": result["_id"]
         }
 
     except HTTPException:
