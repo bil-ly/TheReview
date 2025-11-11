@@ -1,14 +1,13 @@
-import pytest
 import asyncio
-from typing import AsyncGenerator
-from httpx import AsyncClient, ASGITransport
-from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
+from collections.abc import AsyncGenerator
+
+import pytest
 from fastapi import FastAPI
+from httpx import ASGITransport, AsyncClient
+from motor.motor_asyncio import AsyncIOMotorClient, AsyncIOMotorDatabase
 
-from app.main import app as main_app
 from app.core.auth.auth_setup import create_auth_service
-from app.core.config import settings
-
+from app.main import app as main_app
 
 # MongoDB Test Database Configuration
 TEST_MONGODB_URL = "mongodb://localhost:27017"
@@ -24,7 +23,7 @@ def event_loop():
 
 
 @pytest.fixture(scope="function")
-async def test_db() -> AsyncGenerator[AsyncIOMotorDatabase, None]:
+async def test_db() -> AsyncGenerator[AsyncIOMotorDatabase]:
     """
     Create a test database for each test function.
     Drops the database after the test completes.
@@ -54,14 +53,11 @@ async def app(test_db: AsyncIOMotorDatabase) -> FastAPI:
 
 
 @pytest.fixture(scope="function")
-async def client(app: FastAPI) -> AsyncGenerator[AsyncClient, None]:
+async def client(app: FastAPI) -> AsyncGenerator[AsyncClient]:
     """
     Create an async HTTP client for testing API endpoints.
     """
-    async with AsyncClient(
-        transport=ASGITransport(app=app),
-        base_url="http://test"
-    ) as ac:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         yield ac
 
 
@@ -72,7 +68,7 @@ def sample_user_data():
         "username": "testuser",
         "email": "test@example.com",
         "full_name": "Test User",
-        "password": "SecureP@ssw0rd123!"
+        "password": "SecureP@ssw0rd123!",
     }
 
 
@@ -83,7 +79,7 @@ def sample_user_data_2():
         "username": "anotheruser",
         "email": "another@example.com",
         "full_name": "Another User",
-        "password": "AnotherP@ss123!"
+        "password": "AnotherP@ss123!",
     }
 
 
@@ -94,10 +90,7 @@ async def registered_user(client: AsyncClient, sample_user_data):
     """
     response = await client.post("/auth/register", json=sample_user_data)
     assert response.status_code == 200
-    return {
-        "user_data": sample_user_data,
-        "response": response.json()
-    }
+    return {"user_data": sample_user_data, "response": response.json()}
 
 
 @pytest.fixture
@@ -107,11 +100,7 @@ async def authenticated_user(client: AsyncClient, registered_user):
     """
     user_data = registered_user["user_data"]
     login_response = await client.post(
-        "/auth/login",
-        json={
-            "username": user_data["username"],
-            "password": user_data["password"]
-        }
+        "/auth/login", json={"username": user_data["username"], "password": user_data["password"]}
     )
     assert login_response.status_code == 200
     token_data = login_response.json()
@@ -119,5 +108,5 @@ async def authenticated_user(client: AsyncClient, registered_user):
     return {
         "user_data": user_data,
         "token": token_data["access_token"],
-        "token_type": token_data["token_type"]
+        "token_type": token_data["token_type"],
     }

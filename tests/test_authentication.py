@@ -7,7 +7,6 @@ This module tests:
 - Error handling and validation
 """
 
-import pytest
 from httpx import AsyncClient
 
 
@@ -30,10 +29,7 @@ class TestUserRegistration:
     ):
         """Test registration with duplicate username fails."""
         # Try to register with same username but different email
-        duplicate_data = {
-            **sample_user_data,
-            "email": "different@example.com"
-        }
+        duplicate_data = {**sample_user_data, "email": "different@example.com"}
 
         response = await client.post("/auth/register", json=duplicate_data)
 
@@ -41,16 +37,14 @@ class TestUserRegistration:
         data = response.json()
         assert "detail" in data
 
-    async def test_register_user_duplicate_email(
-        self, client: AsyncClient, registered_user
-    ):
+    async def test_register_user_duplicate_email(self, client: AsyncClient, registered_user):
         """Test registration with duplicate email fails."""
         # Try to register with same email but different username
         duplicate_data = {
             "username": "differentuser",
             "email": registered_user["user_data"]["email"],
             "full_name": "Different User",
-            "password": "AnotherP@ss123!"
+            "password": "AnotherP@ss123!",
         }
 
         response = await client.post("/auth/register", json=duplicate_data)
@@ -65,7 +59,7 @@ class TestUserRegistration:
             "username": "weakpass",
             "email": "weak@example.com",
             "full_name": "Weak Password",
-            "password": "123"  # Too short and weak
+            "password": "123",  # Too short and weak
         }
 
         response = await client.post("/auth/register", json=weak_password_data)
@@ -78,7 +72,7 @@ class TestUserRegistration:
         """Test registration with missing required fields fails."""
         incomplete_data = {
             "username": "incomplete",
-            "email": "incomplete@example.com"
+            "email": "incomplete@example.com",
             # Missing full_name and password
         }
 
@@ -98,7 +92,7 @@ class TestUserRegistration:
             "username": "invalidemail",
             "email": "not-an-email",
             "full_name": "Invalid Email",
-            "password": "ValidP@ss123!"
+            "password": "ValidP@ss123!",
         }
 
         response = await client.post("/auth/register", json=invalid_email_data)
@@ -117,7 +111,7 @@ class TestUserRegistration:
             "username": "",
             "email": "empty@example.com",
             "full_name": "Empty Username",
-            "password": "ValidP@ss123!"
+            "password": "ValidP@ss123!",
         }
 
         response = await client.post("/auth/register", json=empty_username_data)
@@ -153,10 +147,7 @@ class TestUserLogin:
 
         response = await client.post(
             "/auth/login",
-            json={
-                "username": user_data["username"],
-                "password": user_data["password"]
-            }
+            json={"username": user_data["username"], "password": user_data["password"]},
         )
 
         assert response.status_code == 200
@@ -170,11 +161,7 @@ class TestUserLogin:
     async def test_login_invalid_username(self, client: AsyncClient, registered_user):
         """Test login with non-existent username fails."""
         response = await client.post(
-            "/auth/login",
-            json={
-                "username": "nonexistent",
-                "password": "somepassword"
-            }
+            "/auth/login", json={"username": "nonexistent", "password": "somepassword"}
         )
 
         assert response.status_code == 401
@@ -186,11 +173,7 @@ class TestUserLogin:
         user_data = registered_user["user_data"]
 
         response = await client.post(
-            "/auth/login",
-            json={
-                "username": user_data["username"],
-                "password": "wrongpassword"
-            }
+            "/auth/login", json={"username": user_data["username"], "password": "wrongpassword"}
         )
 
         assert response.status_code == 401
@@ -199,10 +182,7 @@ class TestUserLogin:
 
     async def test_login_missing_username(self, client: AsyncClient):
         """Test login with missing username fails."""
-        response = await client.post(
-            "/auth/login",
-            json={"password": "somepassword"}
-        )
+        response = await client.post("/auth/login", json={"password": "somepassword"})
 
         assert response.status_code == 422
 
@@ -210,35 +190,24 @@ class TestUserLogin:
         """Test login with missing password fails."""
         user_data = registered_user["user_data"]
 
-        response = await client.post(
-            "/auth/login",
-            json={"username": user_data["username"]}
-        )
+        response = await client.post("/auth/login", json={"username": user_data["username"]})
 
         assert response.status_code == 422
 
     async def test_login_empty_credentials(self, client: AsyncClient):
         """Test login with empty credentials fails."""
-        response = await client.post(
-            "/auth/login",
-            json={"username": "", "password": ""}
-        )
+        response = await client.post("/auth/login", json={"username": "", "password": ""})
 
         assert response.status_code in [400, 401, 422]
 
-    async def test_login_case_sensitive_username(
-        self, client: AsyncClient, registered_user
-    ):
+    async def test_login_case_sensitive_username(self, client: AsyncClient, registered_user):
         """Test that username is case-sensitive."""
         user_data = registered_user["user_data"]
 
         # Try to login with uppercase username
         response = await client.post(
             "/auth/login",
-            json={
-                "username": user_data["username"].upper(),
-                "password": user_data["password"]
-            }
+            json={"username": user_data["username"].upper(), "password": user_data["password"]},
         )
 
         # Should fail because username doesn't match
@@ -251,10 +220,7 @@ class TestUserLogin:
         # Login first time
         response1 = await client.post(
             "/auth/login",
-            json={
-                "username": user_data["username"],
-                "password": user_data["password"]
-            }
+            json={"username": user_data["username"], "password": user_data["password"]},
         )
         assert response1.status_code == 200
         token1 = response1.json()["access_token"]
@@ -262,10 +228,7 @@ class TestUserLogin:
         # Login second time
         response2 = await client.post(
             "/auth/login",
-            json={
-                "username": user_data["username"],
-                "password": user_data["password"]
-            }
+            json={"username": user_data["username"], "password": user_data["password"]},
         )
         assert response2.status_code == 200
         token2 = response2.json()["access_token"]
@@ -289,23 +252,21 @@ class TestAuthenticationFlow:
             "/auth/login",
             json={
                 "username": sample_user_data["username"],
-                "password": sample_user_data["password"]
-            }
+                "password": sample_user_data["password"],
+            },
         )
         assert login_response.status_code == 200
         assert "access_token" in login_response.json()
 
-    async def test_cannot_login_before_registration(
-        self, client: AsyncClient, sample_user_data
-    ):
+    async def test_cannot_login_before_registration(self, client: AsyncClient, sample_user_data):
         """Test that user cannot login without registering first."""
         # Try to login without registering
         response = await client.post(
             "/auth/login",
             json={
                 "username": sample_user_data["username"],
-                "password": sample_user_data["password"]
-            }
+                "password": sample_user_data["password"],
+            },
         )
 
         assert response.status_code == 401
