@@ -1,10 +1,7 @@
 import logging
 import logging.config
 import os
-import sys
 from datetime import datetime
-
-from rich.logging import RichHandler
 
 
 def get_logging_config(
@@ -19,7 +16,9 @@ def get_logging_config(
     if multithreaded:
         formatter_format = "%(asctime)s - %(name)s - %(filename)s - %(module)s - %(process)d - %(taskName)s - %(threadName)s - %(thread)d - %(levelname)s - %(message)s"
     else:
-        formatter_format = "%(asctime)s - %(name)s - %(filename)s:%(lineno)s - %(levelname)s - %(message)s"
+        formatter_format = (
+            "%(asctime)s - %(name)s - %(filename)s:%(lineno)s - %(levelname)s - %(message)s"
+        )
 
     formatters = {"custom": {"format": formatter_format}}
     handlers = {}

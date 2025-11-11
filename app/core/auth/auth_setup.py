@@ -1,9 +1,10 @@
 from auth_lib.auth_service import AuthService
+from auth_lib.utils.email_service import DevEmailService
 from auth_lib.utils.redis_utils import TwoFactorService
-from auth_lib.utils.email_service import DevEmailService, GmailSMTPService
 from motor.motor_asyncio import AsyncIOMotorDatabase
-from app.utils.mongo.user_repository import MongoUserRepository
+
 from app.core.config import settings
+from app.utils.mongo.user_repository import MongoUserRepository
 
 
 def create_auth_service(database: AsyncIOMotorDatabase) -> AuthService:
@@ -22,5 +23,5 @@ def create_auth_service(database: AsyncIOMotorDatabase) -> AuthService:
         two_factor_service=two_factor_service,
         email_service=email_service,
         domain=settings.DOMAIN,
-        app_name=settings.APP_NAME
+        app_name=settings.APP_NAME,
     )

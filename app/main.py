@@ -1,10 +1,12 @@
 from contextlib import asynccontextmanager
-from fastapi.middleware.cors import CORSMiddleware
+
 from fastapi import FastAPI
-from app.api.v1 import reviews , authentication , user
+from fastapi.middleware.cors import CORSMiddleware
+
+from app.api.v1 import authentication, reviews, user
 from app.core.auth.auth_setup import create_auth_service
 from app.utils.logger import get_logger
-from app.utils.mongo.mongo import connect_to_mongo, get_db, close_mongo_connection
+from app.utils.mongo.mongo import close_mongo_connection, connect_to_mongo, get_db
 
 logger = get_logger("Main", log_to_std_out=True)
 
@@ -40,12 +42,13 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 # Used for auto IP detection
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
 
+
 app.include_router(authentication.router)
 app.include_router(reviews.router)
 app.include_router(user.router)
-

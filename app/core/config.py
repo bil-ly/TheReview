@@ -1,5 +1,6 @@
 from cryptography.fernet import Fernet
 from dotenv import dotenv_values
+from pydantic import ConfigDict
 from pydantic_settings import BaseSettings
 
 # Load environment variables from config/.env into a dictionary
@@ -7,6 +8,8 @@ config = dotenv_values("config/.env")
 
 
 class Settings(BaseSettings):
+    model_config = ConfigDict(case_sensitive=True)
+
     # App
     APP_NAME: str = ""
     # DEBUG: bool = False
@@ -37,9 +40,6 @@ class Settings(BaseSettings):
     FERNET_KEY: str = Fernet.generate_key().decode()
     # Security
     BCRYPT_ROUNDS: int = 12
-
-    class Config:
-        case_sensitive = True
 
 
 # Create settings instance and override with values from config dictionary

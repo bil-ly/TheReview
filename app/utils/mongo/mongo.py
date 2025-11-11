@@ -1,8 +1,5 @@
-
-import os
 import logging
-from typing import List, Dict, Any
-from dotenv import load_dotenv
+from typing import Any
 
 # --- 1. Use the Asynchronous Client ---
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -13,7 +10,7 @@ from app.core.config import settings
 logger = logging.getLogger("db_utils")
 logger.setLevel(logging.DEBUG)
 handler = logging.StreamHandler()
-formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
 handler.setFormatter(formatter)
 if not logger.handlers:
     logger.addHandler(handler)
@@ -24,7 +21,9 @@ if not logger.handlers:
 class DBContext:
     client: AsyncIOMotorClient = None
 
+
 db_context = DBContext()
+
 
 # --- 3. Lifespan Functions for your main.py ---
 # These functions will be called at application startup and shutdown.
@@ -36,10 +35,12 @@ async def connect_to_mongo():
     logger.info("MongoDB connection successful.")
     logger.debug(f"Connected to URI: {uri}")
 
+
 async def close_mongo_connection():
     """Closes the MongoDB connection."""
     logger.info("Closing MongoDB connection...")
     db_context.client.close()
+
 
 # --- 4. Correct Asynchronous Dependency ---
 async def get_db() -> AsyncIOMotorClient:
@@ -49,7 +50,7 @@ async def get_db() -> AsyncIOMotorClient:
     """
     if db_context.client is None:
         raise Exception("Database client not initialized. Call connect_to_mongo() on startup.")
-   
+
     return db_context.client[settings.MONGO_DATABASE_NAME]
 
 
@@ -57,10 +58,12 @@ async def get_db() -> AsyncIOMotorClient:
 # Every function that touches the database is now an `async def`
 # and uses `await` for the database call.
 
+
 async def get_collection(collection_name: str) -> Collection:
     """Asynchronously retrieves a collection object from the database."""
     db = await get_db()
     return db[collection_name]
+
 
 async def insert_one(doc: dict, collection_name: str, **kwargs) -> Any:
     """Asynchronously inserts a single document."""
@@ -74,7 +77,7 @@ async def insert_one(doc: dict, collection_name: str, **kwargs) -> Any:
         return None
 
 
-async def insert_many(docs: List[dict], collection_name: str) -> List[Any]:
+async def insert_many(docs: list[dict], collection_name: str) -> list[Any]:
     """Asynchronously inserts multiple documents."""
     try:
         db = await get_db()
@@ -86,12 +89,17 @@ async def insert_many(docs: List[dict], collection_name: str) -> List[Any]:
         return []
 
 
-async def find(item: dict = {}, collection_name: str = "schedule", limit: int = 1000) -> List[Dict]:
+async def find(
+    item: dict = None, collection_name: str = "schedule", limit: int = 1000
+) -> list[dict]:
     """Asynchronously finds documents."""
+    if item is None:
+        item = {}
     db = await get_db()
     # You must use .to_list() to get results from an async cursor
     cursor = db[collection_name].find(item)
     return await cursor.to_list(length=limit)
+
 
 async def update_one(
     filter_query: dict,
@@ -104,7 +112,9 @@ async def update_one(
     result = await db[collection_name].update_one(
         filter_query, update=update_data, upsert=create_if_not_exists
     )
-    logger.debug(f"Updated {result.modified_count} doc(s) in {collection_name} matching {filter_query}.")
+    logger.debug(
+        f"Updated {result.modified_count} doc(s) in {collection_name} matching {filter_query}."
+    )
     return result
 
 
@@ -115,4 +125,3 @@ async def delete_one(filter_query: dict, collection_name: str) -> bool:
     if result.deleted_count > 0:
         logger.debug(f"Deleted doc from {collection_name} matching {filter_query}.")
     return result.deleted_count > 0
-
