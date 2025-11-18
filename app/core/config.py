@@ -12,6 +12,7 @@ class Settings(BaseSettings):
 
     # App
     APP_NAME: str = ""
+    APP_ENVIRONMENT: str = "Developemnt"
     # DEBUG: bool = False
     # TODO :
     # Databases
@@ -65,6 +66,8 @@ class Settings(BaseSettings):
     FERNET_KEY: str = Fernet.generate_key().decode()
     # Security
     BCRYPT_ROUNDS: int = 12
+
+    ALLOY_OTLP_ENDPOINT: str= "http://otel-collector:4317"
 
 
 # Create settings instance and override with values from config dictionary
