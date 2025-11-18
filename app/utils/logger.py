@@ -30,15 +30,20 @@ def get_logging_config(
             "rich_tracebacks": True,
         }
 
-    log_file = f"logs/{name}/{datetime.now().strftime('%y_%m_%d')}.log"
-    os.makedirs(os.path.dirname(log_file), exist_ok=True)
-    handlers["file"] = {
-        "class": "logging.FileHandler",
-        "level": level,
-        "formatter": "custom",
-        "filename": log_file,
-        "mode": "a",
-    }
+    # Only add file handler if not in stdout-only mode or if logs directory is writable
+    try:
+        log_file = f"logs/{name}/{datetime.now().strftime('%y_%m_%d')}.log"
+        os.makedirs(os.path.dirname(log_file), exist_ok=True)
+        handlers["file"] = {
+            "class": "logging.FileHandler",
+            "level": level,
+            "formatter": "custom",
+            "filename": log_file,
+            "mode": "a",
+        }
+    except (PermissionError, OSError):
+        # Skip file logging if we can't create the directory
+        pass
 
     logging_config = {
         "version": 1,
