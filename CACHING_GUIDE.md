@@ -512,7 +512,7 @@ FLUSHDB
 
 ## Best Practices
 
-### ✅ DO
+### DO
 - Cache expensive database queries
 - Use descriptive cache keys
 - Set appropriate TTLs
@@ -520,7 +520,7 @@ FLUSHDB
 - Monitor cache performance
 - Use patterns for bulk operations
 
-### ❌ DON'T
+### DON'T
 - Cache user-specific data without user ID in key
 - Use very short TTLs (<1 min) - defeats purpose
 - Cache everything - be selective
@@ -594,4 +594,4 @@ async def test_review_caching():
 - API response time: **↓ 50-70%**
 - Concurrent requests: **↑ 3-5x**
 
-Happy caching! 🚀
+Happy caching! 

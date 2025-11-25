@@ -18,21 +18,6 @@ The CI pipelines require **MongoDB** and **Redis** services to run tests success
 - **Purpose**: Session management and 2FA token storage
 - **Health Check**: Runs `redis-cli ping` every 10 seconds
 
-## Why Tests Were Failing
-
-### Before Fix:
--  Tests tried to connect to `mongodb://localhost:27017`
-- No MongoDB service running in CI
-- Tests tried to connect to Redis at `localhost:6379`
-- No Redis service running in CI
-- Result: Connection errors → Tests fail
-
-### After Fix:
--  MongoDB service container runs on port 27017
--  Redis service container runs on port 6379
--  Health checks ensure services are ready before tests run
--  Tests can connect successfully
--  Result: Tests pass in CI
 
 ## Local vs CI
 

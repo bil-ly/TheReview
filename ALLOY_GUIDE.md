@@ -6,7 +6,7 @@ TheReview uses **Grafana Alloy** for complete observability - collecting metrics
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 ┌──────────────────────────────────────────────────────────┐
@@ -26,7 +26,7 @@ TheReview uses **Grafana Alloy** for complete observability - collecting metrics
 
 ---
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### 1. Enable Telemetry
 
@@ -61,7 +61,7 @@ docker-compose -f docker-compose.prod.yml --profile monitoring up -d
 
 ---
 
-## 📊 What Gets Collected?
+##  What Gets Collected?
 
 ### 1. Application Metrics (OpenTelemetry)
 
@@ -122,7 +122,7 @@ counter.add(1, {"platform": "google"})
 
 ---
 
-## 🔧 Configuration
+## Configuration
 
 ### Alloy Configuration (River Syntax)
 
@@ -161,7 +161,7 @@ setup_telemetry(app)  # Automatic instrumentation
 
 ---
 
-## 📈 Grafana Dashboards
+## Grafana Dashboards
 
 ### Pre-built Dashboards
 
@@ -205,7 +205,7 @@ Password: (from .env GRAFANA_ADMIN_PASSWORD)
 
 ---
 
-## 🔍 Metrics Examples
+## Metrics Examples
 
 ### 1. Request Rate
 
@@ -240,7 +240,7 @@ pg_stat_database_numbackends
 
 ---
 
-## 🎯 Custom Instrumentation
+## Custom Instrumentation
 
 ### Add Custom Metrics
 
@@ -293,7 +293,7 @@ async def create_review(review: ReviewCreate):
 
 ---
 
-## 🌐 Grafana Cloud Integration
+## Grafana Cloud Integration
 
 ### Send Data to Grafana Cloud
 
@@ -326,7 +326,7 @@ docker-compose -f docker-compose.prod.yml restart alloy
 
 ---
 
-## 🔐 Security Best Practices
+## Security Best Practices
 
 ### 1. Use TLS for Production
 
@@ -368,7 +368,7 @@ location /metrics {
 
 ---
 
-## 🐛 Troubleshooting
+##  Troubleshooting
 
 ### Alloy Not Receiving Data
 
@@ -429,7 +429,7 @@ env | grep ALLOY_OTLP_ENDPOINT
 
 ---
 
-## 📊 Performance Impact
+## Performance Impact
 
 ### Resource Usage
 
@@ -467,7 +467,7 @@ env | grep ALLOY_OTLP_ENDPOINT
 
 ---
 
-## 🎓 Learning Resources
+## Learning Resources
 
 ### Grafana Alloy
 
@@ -489,21 +489,21 @@ env | grep ALLOY_OTLP_ENDPOINT
 
 ---
 
-## 🔄 Migration from Prometheus
+## Migration from Prometheus
 
 Already using Prometheus? Alloy is compatible!
 
 ### What Changes?
 
 | Feature | Prometheus | Alloy |
-|---------|-----------|-------|
-| Scraping | ✅ | ✅ Compatible |
-| PromQL | ✅ | ✅ Same queries |
-| Recording Rules | ✅ | ✅ Supported |
-| Alerting | ✅ | ✅ + More |
-| **Logs** | ❌ | ✅ Native |
-| **Traces** | ❌ | ✅ Native |
-| **OpenTelemetry** | Limited | ✅ Full |
+|---------|---|-------|
+| Scraping | |  Compatible |
+| PromQL | | Same queries |
+| Recording Rules | |  Supported |
+| Alerting | |  + More |
+| **Logs** | |  Native |
+| **Traces** | |  Native |
+| **OpenTelemetry** | Limited |  Full |
 
 ### Migration Steps
 
@@ -516,9 +516,9 @@ Already using Prometheus? Alloy is compatible!
 
 ---
 
-## ✅ Best Practices
+## Best Practices
 
-### ✅ DO
+###  DO
 
 - Enable telemetry in production
 - Use sampling for high-traffic traces
@@ -528,7 +528,7 @@ Already using Prometheus? Alloy is compatible!
 - Add custom business metrics
 - Set up alerts in Grafana
 
-### ❌ DON'T
+###  DON'T
 
 - Collect every single span (use sampling)
 - Expose /metrics publicly
@@ -540,17 +540,17 @@ Already using Prometheus? Alloy is compatible!
 
 ---
 
-## 🎉 Summary
+## Summary
 
 You now have:
 
-✅ **Unified Observability** - Metrics, logs, traces in one place
-✅ **Automatic Instrumentation** - FastAPI, databases, containers
-✅ **Custom Metrics** - Add your own business metrics
-✅ **Distributed Tracing** - See full request flows
-✅ **Grafana Dashboards** - Pre-configured visualizations
-✅ **Grafana Cloud Ready** - Send data to cloud
-✅ **Production Ready** - Secure, scalable, monitored
+**Unified Observability** - Metrics, logs, traces in one place
+**Automatic Instrumentation** - FastAPI, databases, containers
+**Custom Metrics** - Add your own business metrics
+**Distributed Tracing** - See full request flows
+**Grafana Dashboards** - Pre-configured visualizations
+**Grafana Cloud Ready** - Send data to cloud
+**Production Ready** - Secure, scalable, monitored
 
 ---
 
@@ -561,4 +561,4 @@ You now have:
 - **Metrics**: http://localhost:8000/metrics
 - **Health**: http://localhost:8000/health/ready
 
-**Start monitoring!** 🚀
+**Start monitoring!** 
