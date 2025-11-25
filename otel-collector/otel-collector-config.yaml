@@ -1,19 +1,3 @@
-# =============================================================================
-# OpenTelemetry Collector Configuration
-# =============================================================================
-# Industry Standard Setup for receiving, processing, and exporting telemetry
-#
-# GitHub Actions-Style Structure:
-#   receivers:   How to RECEIVE data (like "on: push" trigger)
-#   processors:  How to PROCESS data (like "jobs" with steps)
-#   exporters:   Where to EXPORT data (like deployment targets)
-#   extensions:  Additional features (like environment variables)
-#   service:     Pipeline that connects everything (like workflow execution)
-# =============================================================================
-
-# =============================================================================
-# EXTENSIONS: Health checks and performance monitoring
-# =============================================================================
 extensions:
   # Health check endpoint for Docker/K8s
   health_check:
@@ -28,21 +12,13 @@ extensions:
   zpages:
     endpoint: 0.0.0.0:55679
 
-# =============================================================================
-# RECEIVERS: How to receive telemetry data
-# =============================================================================
+
 receivers:
-  # -------------------------------------------------------------------------
-  # OTLP Receiver (primary) - Receives from your FastAPI app
-  # -------------------------------------------------------------------------
   otlp:
     protocols:
-      # gRPC endpoint (preferred - faster, binary protocol)
       grpc:
         endpoint: 0.0.0.0:4317
-        # Max message size (100MB)
         max_recv_msg_size_mib: 100
-        # Connection settings
         keepalive:
           server_parameters:
             max_connection_idle: 11s
@@ -51,18 +27,14 @@ receivers:
             time: 30s
             timeout: 5s
 
-      # HTTP endpoint (alternative - easier for debugging)
       http:
         endpoint: 0.0.0.0:4318
         cors:
           allowed_origins:
-            - "*"  # In production: specify your domains
+            - "*"
           allowed_headers:
             - "*"
 
-  # -------------------------------------------------------------------------
-  # Prometheus Receiver (scrapes /metrics endpoint)
-  # -------------------------------------------------------------------------
   prometheus:
     config:
       scrape_configs:
@@ -75,9 +47,6 @@ receivers:
                 service: 'thereview-backend'
                 environment: 'development'
 
-  # -------------------------------------------------------------------------
-  # Host Metrics Receiver (system metrics: CPU, memory, disk, network)
-  # -------------------------------------------------------------------------
   hostmetrics:
     collection_interval: 30s
     scrapers:
@@ -96,30 +65,17 @@ receivers:
       paging:
       processes:
 
-# =============================================================================
-# PROCESSORS: How to process/transform data (like GitHub Actions jobs)
-# =============================================================================
 processors:
-  # -------------------------------------------------------------------------
-  # STEP 1: Memory Limiter (prevent OOM - Out Of Memory)
-  # -------------------------------------------------------------------------
   memory_limiter:
     check_interval: 1s
-    limit_mib: 512      # Hard limit: 512MB
-    spike_limit_mib: 128  # Allow 128MB spike
+    limit_mib: 512
+    spike_limit_mib: 128
 
-  # -------------------------------------------------------------------------
-  # STEP 2: Batch Processor (batch data before sending - reduces network calls)
-  # -------------------------------------------------------------------------
   batch:
-    # Send batch every 10 seconds OR when it reaches 8192 items
     timeout: 10s
     send_batch_size: 8192
     send_batch_max_size: 10000
 
-  # -------------------------------------------------------------------------
-  # STEP 3: Resource Detection (auto-detect environment info)
-  # -------------------------------------------------------------------------
   resource:
     attributes:
       - key: deployment.environment
@@ -132,9 +88,6 @@ processors:
         value: "local"
         action: insert
 
-  # -------------------------------------------------------------------------
-  # STEP 4: Resource Processor (add custom resource attributes)
-  # -------------------------------------------------------------------------
   resource/add_attributes:
     attributes:
       - key: collector.version
@@ -144,9 +97,6 @@ processors:
         value: "thereview-otel-collector"
         action: insert
 
-  # -------------------------------------------------------------------------
-  # STEP 5: Attributes Processor (add/modify span attributes)
-  # -------------------------------------------------------------------------
   attributes/common:
     actions:
       # Add timestamp
@@ -158,18 +108,12 @@ processors:
         action: insert
         value: ${env:HOSTNAME}
 
-  # -------------------------------------------------------------------------
-  # STEP 6: Span Processor (filter/modify spans)
-  # -------------------------------------------------------------------------
   span:
     name:
       # Rename spans (useful for consistent naming)
       from_attributes: ["http.method", "http.route"]
       separator: " "
 
-  # -------------------------------------------------------------------------
-  # STEP 7: Metrics Transform (rename/aggregate metrics)
-  # -------------------------------------------------------------------------
   metricstransform:
     transforms:
       # Example: rename metrics
@@ -178,13 +122,7 @@ processors:
         action: update
         new_name: api.$${1}
 
-# =============================================================================
-# EXPORTERS: Where to send processed data
-# =============================================================================
 exporters:
-  # -------------------------------------------------------------------------
-  # OTLP Exporter to Grafana Alloy (primary destination)
-  # -------------------------------------------------------------------------
   otlp/alloy:
     endpoint: ${env:ALLOY_ENDPOINT}
     tls:
@@ -201,45 +139,20 @@ exporters:
       num_consumers: 10
       queue_size: 5000
 
-  # -------------------------------------------------------------------------
-  # Logging Exporter (for debugging - prints to console)
-  # -------------------------------------------------------------------------
   logging:
     loglevel: info
     sampling_initial: 5
     sampling_thereafter: 200
 
-  # -------------------------------------------------------------------------
-  # Prometheus Exporter (exposes metrics on /metrics endpoint)
-  # -------------------------------------------------------------------------
   prometheus:
     endpoint: 0.0.0.0:8889
     namespace: thereview
     const_labels:
       environment: development
-
-  # -------------------------------------------------------------------------
-  # File Exporter (backup - writes to local files)
-  # DISABLED: Permission issues in container
-  # -------------------------------------------------------------------------
-  # file:
-  #   path: /var/log/otel/telemetry.json
-  #   rotation:
-  #     max_megabytes: 100
-  #     max_days: 7
-  #     max_backups: 3
-
-# =============================================================================
-# SERVICE: Pipeline configuration (connects receivers → processors → exporters)
-# =============================================================================
 service:
-  # Extensions to enable
   extensions: [health_check, pprof, zpages]
 
   pipelines:
-    # -------------------------------------------------------------------------
-    # TRACES Pipeline (distributed tracing data)
-    # -------------------------------------------------------------------------
     traces:
       receivers: [otlp]
       processors:
@@ -252,10 +165,6 @@ service:
       exporters:
         - otlp/alloy          # Send to Grafana Alloy
         - logging             # Also log to console (debug)
-
-    # -------------------------------------------------------------------------
-    # METRICS Pipeline (numerical measurements over time)
-    # -------------------------------------------------------------------------
     metrics:
       receivers: [otlp, prometheus, hostmetrics]
       processors:
@@ -270,9 +179,6 @@ service:
         - prometheus          # Expose on :8889/metrics
         - logging             # Also log to console (debug)
 
-    # -------------------------------------------------------------------------
-    # LOGS Pipeline (application logs - future use)
-    # -------------------------------------------------------------------------
     logs:
       receivers: [otlp]
       processors:
@@ -285,9 +191,6 @@ service:
         # - file              # Backup to local files (disabled: permission issues)
         - logging             # Also log to console (debug)
 
-  # -------------------------------------------------------------------------
-  # Telemetry (collector's own metrics - for monitoring the collector)
-  # -------------------------------------------------------------------------
   telemetry:
     logs:
       level: info
